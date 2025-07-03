@@ -1,7 +1,11 @@
 param(
-    [Parameter(Mandatory=$true, HelpMessage="Service à filtrer")]
+    [Parameter(Mandatory=$true, HelpMessage="Service a filtrer (Informatique, Marketing, RH, Comptabilite)")]
+    [ValidateNotNullOrEmpty()]
     [string]$Service
 )
+
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
 
 Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host "    RAPPORT EMPLOYES - SERVICE: $Service" -ForegroundColor Cyan
@@ -11,12 +15,18 @@ Write-Host "===============================================" -ForegroundColor Cy
 Write-Host "`nImport du module EmployeTools..." -ForegroundColor Yellow
 
 try {
-    Import-Module "./EmployeTools.psm1" -Force
-    Write-Host "Module EmployeTools importe avec succes" -ForegroundColor Green
+    if (Test-Path "EmployeTools.psm1") {
+        Import-Module ".\EmployeTools.psm1" -Force
+        Write-Host "Module EmployeTools importe avec succes" -ForegroundColor Green
+    } else {
+        throw "Le fichier EmployeTools.psm1 n'existe pas dans le repertoire courant"
+    }
 }
 catch {
     Write-Host "Erreur lors de l'import du module : $($_.Exception.Message)" -ForegroundColor Red
     Write-Host "Assurez-vous que le fichier EmployeTools.psm1 est present dans le repertoire courant" -ForegroundColor Yellow
+    Write-Host "Fichiers presents dans le repertoire :" -ForegroundColor Yellow
+    Get-ChildItem | ForEach-Object { Write-Host "  $($_.Name)" }
     exit 1
 }
 
@@ -36,7 +46,7 @@ catch {
     exit 1
 }
 
-# Filtrage des employés du service demandé
+# Filtrage des employes du service demande
 Write-Host "`nFiltrage des employes du service '$Service'..." -ForegroundColor Yellow
 
 try {
@@ -59,7 +69,7 @@ catch {
     exit 1
 }
 
-# Affichage des informations avec le préfixe [Employé]
+# Affichage des informations avec le prefixe [Employe]
 Write-Host "`nDETAILS DES EMPLOYES DU SERVICE $Service" -ForegroundColor Cyan
 Write-Host "---------------------------------------------" -ForegroundColor Cyan
 
@@ -67,7 +77,7 @@ foreach ($employe in $employesFiltres) {
     Afficher-Employe -Employe $employe -Prefix "[Employe]"
 }
 
-# Statistiques supplémentaires
+# Statistiques supplementaires
 Write-Host "`nSTATISTIQUES DU SERVICE" -ForegroundColor Green
 Write-Host "----------------------------" -ForegroundColor Green
 
